@@ -1,0 +1,891 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Wolf Mart | Curated Elegance</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;1,400&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .font-serif {
+            font-family: 'Playfair Display', serif;
+        }
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #050505; 
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #333; 
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #fff; 
+        }
+        
+        /* Animations */
+        .fade-in {
+            animation: fadeIn 0.6s ease-out forwards;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        /* Mobile fixes */
+        .line-clamp-2 {
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;  
+            overflow: hidden;
+        }
+    </style>
+</head>
+<body class="bg-[#050505] text-white selection:bg-white selection:text-black min-h-screen flex flex-col">
+
+    <!-- Navbar -->
+    <nav class="fixed top-0 w-full z-40 bg-[#050505]/90 backdrop-blur-md border-b border-white/10">
+        <div class="max-w-7xl mx-auto px-4 md:px-6 h-20 flex items-center justify-between">
+            
+            <!-- Admin Lock Icon -->
+            <button id="navAdminBtn" class="p-2 text-gray-500 hover:text-white transition-colors duration-300">
+                <svg id="lockIcon" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+                <svg id="xIcon" class="hidden" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+            </button>
+
+            <!-- Logo -->
+            <div id="navLogoBtn" class="absolute left-1/2 -translate-x-1/2 flex items-center flex-col cursor-pointer">
+                <h1 class="text-xl md:text-3xl font-serif tracking-[0.3em] font-light text-white uppercase">Wolf Mart</h1>
+                <div class="h-[1px] w-8 md:w-12 bg-white mt-2"></div>
+            </div>
+
+            <!-- Cart Icon -->
+            <button id="navCartBtn" class="p-2 relative text-white hover:text-gray-300 transition-colors duration-300">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path><line x1="3" y1="6" x2="21" y2="6"></line><path d="M16 10a4 4 0 0 1-8 0"></path></svg>
+                <span id="cartBadge" class="hidden absolute top-0 right-0 bg-white text-black text-[10px] font-bold w-5 h-5 flex items-center justify-center rounded-full shadow-md">0</span>
+            </button>
+        </div>
+    </nav>
+
+    <!-- Admin Login Modal -->
+    <div id="adminModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-white/5 backdrop-blur-md p-4">
+        <div class="bg-[#050505] border border-white/20 p-8 md:p-10 w-full max-w-md shadow-2xl relative fade-in">
+            <button id="closeAdminModal" class="absolute top-4 right-4 text-gray-500 hover:text-white p-2 transition-colors">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+            </button>
+            <h2 class="text-2xl font-serif tracking-widest uppercase mb-8 text-center text-white">Admin Access</h2>
+            <form id="adminForm" class="space-y-8">
+                <div>
+                    <input type="password" id="adminPassword" placeholder="Enter Passcode" class="w-full bg-transparent border-b border-gray-600 p-4 text-white focus:outline-none focus:border-white transition-colors tracking-widest text-center placeholder:tracking-normal text-lg" required />
+                </div>
+                <p id="adminError" class="text-red-500 text-sm text-center hidden"></p>
+                <button type="submit" class="w-full bg-white text-black py-4 text-sm tracking-widest uppercase font-bold hover:bg-gray-200 transition-all duration-300">
+                    Authenticate
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Checkout / Get Information Modal (FULL SCREEN) -->
+    <div id="checkoutModal" class="fixed inset-0 z-[60] hidden w-full h-full bg-white text-black overflow-hidden">
+        <div class="flex flex-col md:flex-row h-full w-full">
+            
+            <!-- Left Side: Brand Imagery / Black Luxury -->
+            <div class="hidden md:flex md:w-1/2 bg-[#050505] text-white flex-col items-center justify-center p-12 relative border-r border-white/10">
+                <div class="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/stardust.png')] opacity-20 pointer-events-none"></div>
+                <h2 class="text-4xl lg:text-6xl font-serif tracking-[0.2em] uppercase mb-6 text-center">Acquisition</h2>
+                <div class="h-[1px] w-24 bg-white mb-8"></div>
+                <p class="text-gray-400 text-center max-w-md tracking-wider leading-relaxed text-sm">
+                    Please provide your coordination details. Our elite concierges will personally handle the secure delivery of your selected masterpieces.
+                </p>
+            </div>
+
+            <!-- Right Side: Form / White Luxury -->
+            <div class="w-full md:w-1/2 bg-white text-black flex flex-col items-center justify-center p-6 md:p-12 lg:p-24 overflow-y-auto relative h-full">
+                <button id="closeCheckoutModal" class="absolute top-6 right-6 md:top-8 md:right-8 text-black hover:text-gray-500 p-2 transition-colors">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                </button>
+                
+                <!-- Form State -->
+                <div id="checkoutFormContainer" class="w-full max-w-md fade-in py-12">
+                    <h2 class="text-3xl font-serif tracking-widest uppercase mb-2 text-center text-black md:hidden">Acquisition</h2>
+                    <p class="text-center text-xs text-gray-500 mb-10 uppercase tracking-widest">Client Details Form</p>
+                    
+                    <form id="checkoutForm" class="space-y-6">
+                        <div>
+                            <input type="text" id="coName" placeholder="Full Name" required class="w-full bg-transparent border-b border-black/20 p-4 text-black text-lg focus:outline-none focus:border-black transition-colors placeholder:text-gray-400" />
+                        </div>
+                        <div>
+                            <input type="tel" id="coPhone" placeholder="Phone Number" required class="w-full bg-transparent border-b border-black/20 p-4 text-black text-lg focus:outline-none focus:border-black transition-colors placeholder:text-gray-400" />
+                        </div>
+                        <div>
+                            <input type="tel" id="coWhatsapp" placeholder="WhatsApp Number (Optional)" class="w-full bg-transparent border-b border-black/20 p-4 text-black text-lg focus:outline-none focus:border-black transition-colors placeholder:text-gray-400" />
+                        </div>
+                        <div>
+                            <textarea id="coAddress" placeholder="Delivery Address" required rows="3" class="w-full bg-transparent border-b border-black/20 p-4 text-black text-lg focus:outline-none focus:border-black transition-colors placeholder:text-gray-400 resize-none mt-2"></textarea>
+                        </div>
+                        <button type="submit" id="coSubmitBtn" class="w-full bg-black text-white py-5 mt-8 text-sm tracking-widest uppercase font-bold hover:bg-gray-800 transition-all shadow-xl">
+                            Confirm Inquiry
+                        </button>
+                    </form>
+                </div>
+
+                <!-- Success State -->
+                <div id="checkoutSuccessContainer" class="hidden flex-col items-center py-12 text-center fade-in max-w-md">
+                    <div class="w-20 h-20 rounded-full border-2 border-black flex items-center justify-center mb-8">
+                        <svg class="text-black" xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                    </div>
+                    <h3 class="text-3xl font-serif text-black mb-4">Inquiry Received</h3>
+                    <p class="text-gray-600 text-base leading-relaxed tracking-wide">Thank you. Our concierges will review your request and contact you shortly to finalize your acquisition.</p>
+                    <button id="checkoutDoneBtn" class="mt-12 w-full border border-black text-black py-4 text-xs tracking-widest uppercase font-bold hover:bg-black hover:text-white transition-colors">
+                        Return to Gallery
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content Area -->
+    <main class="pt-24 md:pt-32 pb-20 px-4 md:px-6 max-w-7xl mx-auto flex-1 w-full">
+        
+        <!-- STOREFRONT VIEW -->
+        <div id="storefrontView" class="fade-in">
+            <!-- Hero Section -->
+            <div class="text-center mb-16 md:mb-24 mt-8 md:mt-12">
+                <h2 class="text-4xl md:text-6xl font-serif font-light tracking-tight mb-4 md:mb-6 text-white">
+                    Curated <span class="italic font-light text-gray-400">Elegance</span>
+                </h2>
+                <p class="text-gray-400 max-w-2xl mx-auto tracking-wide text-xs md:text-sm leading-relaxed px-4">
+                    Discover the pinnacle of luxury craftsmanship. Wolf Mart presents an exclusive collection of masterpieces, designed for those who appreciate the extraordinary.
+                </p>
+            </div>
+
+            <!-- Product Grid -->
+            <div id="storeGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-12 md:gap-y-16">
+                <!-- Products injected here -->
+                <div class="col-span-full text-center py-20 border border-white/10 bg-transparent">
+                    <p class="text-gray-500 tracking-widest uppercase text-sm animate-pulse">Loading collection...</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- ADMIN DASHBOARD VIEW -->
+        <div id="adminView" class="hidden fade-in bg-white text-black p-6 md:p-10 shadow-2xl rounded-sm">
+            <div class="flex flex-col md:flex-row md:items-center justify-between mb-8 md:mb-12 gap-4">
+                <h2 class="text-2xl md:text-3xl font-serif text-black tracking-wider border-b-2 border-black inline-block pb-2">Admin Chamber</h2>
+                <span class="px-4 py-2 bg-black text-white text-[10px] md:text-xs tracking-widest uppercase font-bold w-fit">Authenticated</span>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 md:gap-12">
+                
+                <!-- Add Product Form -->
+                <div class="lg:col-span-1 border border-gray-200 bg-gray-50 shadow-sm p-6 md:p-8 h-fit lg:sticky lg:top-32">
+                    <h3 class="text-base md:text-lg font-serif mb-6 tracking-widest uppercase border-b border-gray-300 pb-4 text-black">Add New Piece</h3>
+                    <form id="addProductForm" class="space-y-5">
+                        <div>
+                            <label class="block text-[10px] md:text-xs tracking-widest text-gray-500 uppercase mb-2">Title</label>
+                            <input type="text" id="prodTitle" required class="w-full bg-white border border-gray-300 p-3 text-black text-sm focus:outline-none focus:border-black transition-colors" />
+                        </div>
+                        <div>
+                            <label class="block text-[10px] md:text-xs tracking-widest text-gray-500 uppercase mb-2">Price (₹)</label>
+                            <input type="number" id="prodPrice" required min="0" step="0.01" class="w-full bg-white border border-gray-300 p-3 text-black text-sm focus:outline-none focus:border-black transition-colors" />
+                        </div>
+                        <div>
+                            <label class="block text-[10px] md:text-xs tracking-widest text-gray-500 uppercase mb-2">Description</label>
+                            <textarea id="prodDesc" required rows="3" class="w-full bg-white border border-gray-300 p-3 text-black text-sm focus:outline-none focus:border-black transition-colors resize-none"></textarea>
+                        </div>
+                        <div>
+                            <label class="block text-[10px] md:text-xs tracking-widest text-gray-500 uppercase mb-2">Artwork/Image</label>
+                            <div class="border border-dashed border-gray-400 bg-white p-4 flex flex-col items-center justify-center hover:border-black transition-colors cursor-pointer relative min-h-[120px]">
+                                <input type="file" id="prodImage" accept="image/*" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer" />
+                                
+                                <div id="imagePlaceholder" class="flex flex-col items-center text-gray-500 text-center">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="mb-2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
+                                    <span class="text-sm">Choose File</span>
+                                    <span class="text-[10px] opacity-70 mt-1">Auto-compresses</span>
+                                </div>
+                                
+                                <div id="imagePreviewContainer" class="hidden flex-col items-center w-full">
+                                    <img id="imagePreview" src="" alt="Preview" class="h-24 object-cover mb-2 border border-gray-200 shadow-sm" />
+                                    <span class="text-xs text-black flex items-center gap-1 font-bold">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                                        Image Ready
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                        <button type="submit" id="submitBtn" class="w-full bg-black text-white py-4 mt-2 text-xs md:text-sm tracking-widest uppercase hover:bg-gray-800 transition-all flex justify-center items-center gap-2 font-bold shadow-md disabled:opacity-50">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                            Publish Piece
+                        </button>
+                    </form>
+                </div>
+
+                <!-- Product & Order Management Columns -->
+                <div class="lg:col-span-2 space-y-12">
+                    
+                    <!-- Client Inquiries (Orders) -->
+                    <div>
+                        <h3 class="text-base md:text-lg font-serif mb-6 tracking-widest uppercase border-b border-gray-300 pb-4 flex items-center justify-between">
+                            <span>Client Inquiries</span>
+                            <span id="orderCountBadge" class="bg-black text-white text-[10px] px-2 py-1 rounded-full font-sans">0</span>
+                        </h3>
+                        <div id="adminOrdersGrid" class="grid grid-cols-1 gap-4">
+                            <!-- Orders injected here -->
+                            <p class="text-gray-500 text-sm">No inquiries at the moment.</p>
+                        </div>
+                    </div>
+
+                    <!-- Product Grid -->
+                    <div>
+                        <h3 class="text-base md:text-lg font-serif mb-6 tracking-widest uppercase border-b border-gray-300 pb-4">Collection Management</h3>
+                        <div id="adminGrid" class="grid grid-cols-1 sm:grid-cols-2 gap-4 md:gap-6">
+                            <!-- Admin products injected here -->
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Cart Sidebar & Overlay -->
+    <div id="cartOverlay" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-40 hidden transition-opacity"></div>
+    <div id="cartSidebar" class="fixed inset-y-0 right-0 w-[85vw] sm:w-[450px] bg-white text-black border-l border-white/10 shadow-2xl z-50 transform translate-x-full transition-transform duration-500 ease-in-out">
+        <div class="h-full flex flex-col">
+            <div class="p-6 md:p-8 border-b border-gray-200 flex items-center justify-between">
+                <h2 class="text-xl md:text-2xl font-serif tracking-widest uppercase text-black">Your Selection</h2>
+                <button id="closeCartBtn" class="text-gray-400 hover:text-black p-2 transition-colors">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                </button>
+            </div>
+            
+            <div id="cartItemsContainer" class="flex-1 overflow-y-auto p-6 md:p-8 space-y-6 md:space-y-8">
+                <!-- Cart Items injected here -->
+            </div>
+
+            <div id="cartFooter" class="p-6 md:p-8 border-t border-gray-200 bg-gray-50 hidden">
+                <div class="flex justify-between items-center mb-6 md:mb-8 text-lg md:text-xl text-black">
+                    <span class="font-serif tracking-wider">Subtotal</span>
+                    <span id="cartTotal" class="tracking-widest font-bold">₹ 0.00</span>
+                </div>
+                <button id="checkoutBtn" class="w-full bg-black text-white py-5 text-sm tracking-widest uppercase font-bold hover:bg-gray-800 transition-colors flex justify-center items-center gap-3 shadow-xl">
+                    Proceed to Request 
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="border-t border-white/10 py-10 md:py-16 text-center text-gray-500 text-[10px] md:text-xs tracking-widest uppercase mt-auto">
+        <p>&copy; 2026 Wolf Mart. Pure Curated Elegance. All rights reserved.</p>
+    </footer>
+
+    <!-- Firebase Logic & App State -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, onAuthStateChanged, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, collection, addDoc, deleteDoc, doc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        // --- Configuration ---
+        const userFirebaseConfig = {
+            apiKey: "AIzaSyC7TZL7cNzlGrWTrKccMN1TFlyWyf_M-74",
+            authDomain: "wolf-mart-62ad4.firebaseapp.com",
+            databaseURL: "https://wolf-mart-62ad4-default-rtdb.firebaseio.com",
+            projectId: "wolf-mart-62ad4",
+            storageBucket: "wolf-mart-62ad4.firebasestorage.app",
+            messagingSenderId: "498608083450",
+            appId: "1:498608083450:web:c1b0ca073c1499e35dd443",
+            measurementId: "G-0SCXKMHQCY"
+        };
+
+        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : userFirebaseConfig;
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'wolf-mart-default';
+
+        const getProductsCollectionPath = () => {
+            if (typeof __app_id !== 'undefined') {
+                return collection(db, 'artifacts', appId, 'public', 'data', 'products');
+            }
+            return collection(db, 'products');
+        };
+
+        const getOrdersCollectionPath = () => {
+            if (typeof __app_id !== 'undefined') {
+                return collection(db, 'artifacts', appId, 'public', 'data', 'orders');
+            }
+            return collection(db, 'orders');
+        };
+
+        // --- App State ---
+        let user = null;
+        let products = [];
+        let orders = [];
+        let cart = [];
+        let isAdmin = false;
+        let currentImageBase64 = "";
+
+        // --- DOM Elements ---
+        const elements = {
+            storefrontView: document.getElementById('storefrontView'),
+            adminView: document.getElementById('adminView'),
+            storeGrid: document.getElementById('storeGrid'),
+            adminGrid: document.getElementById('adminGrid'),
+            adminOrdersGrid: document.getElementById('adminOrdersGrid'),
+            orderCountBadge: document.getElementById('orderCountBadge'),
+            
+            navAdminBtn: document.getElementById('navAdminBtn'),
+            lockIcon: document.getElementById('lockIcon'),
+            xIcon: document.getElementById('xIcon'),
+            navLogoBtn: document.getElementById('navLogoBtn'),
+            
+            adminModal: document.getElementById('adminModal'),
+            closeAdminModal: document.getElementById('closeAdminModal'),
+            adminForm: document.getElementById('adminForm'),
+            adminPassword: document.getElementById('adminPassword'),
+            adminError: document.getElementById('adminError'),
+
+            addProductForm: document.getElementById('addProductForm'),
+            prodTitle: document.getElementById('prodTitle'),
+            prodPrice: document.getElementById('prodPrice'),
+            prodDesc: document.getElementById('prodDesc'),
+            prodImage: document.getElementById('prodImage'),
+            imagePlaceholder: document.getElementById('imagePlaceholder'),
+            imagePreviewContainer: document.getElementById('imagePreviewContainer'),
+            imagePreview: document.getElementById('imagePreview'),
+            submitBtn: document.getElementById('submitBtn'),
+
+            navCartBtn: document.getElementById('navCartBtn'),
+            cartBadge: document.getElementById('cartBadge'),
+            cartSidebar: document.getElementById('cartSidebar'),
+            cartOverlay: document.getElementById('cartOverlay'),
+            closeCartBtn: document.getElementById('closeCartBtn'),
+            cartItemsContainer: document.getElementById('cartItemsContainer'),
+            cartFooter: document.getElementById('cartFooter'),
+            cartTotal: document.getElementById('cartTotal'),
+            checkoutBtn: document.getElementById('checkoutBtn'),
+
+            checkoutModal: document.getElementById('checkoutModal'),
+            closeCheckoutModal: document.getElementById('closeCheckoutModal'),
+            checkoutFormContainer: document.getElementById('checkoutFormContainer'),
+            checkoutForm: document.getElementById('checkoutForm'),
+            coSubmitBtn: document.getElementById('coSubmitBtn'),
+            checkoutSuccessContainer: document.getElementById('checkoutSuccessContainer'),
+            checkoutDoneBtn: document.getElementById('checkoutDoneBtn'),
+        };
+
+        // --- Formatter ---
+        const formatRupees = (amount) => {
+            return `₹ ${amount.toLocaleString('en-IN', {minimumFractionDigits: 2})}`;
+        };
+
+        // --- Image Compression ---
+        const compressImage = (file) => {
+            return new Promise((resolve) => {
+                const reader = new FileReader();
+                reader.readAsDataURL(file);
+                reader.onload = (event) => {
+                    const img = new Image();
+                    img.src = event.target.result;
+                    img.onload = () => {
+                        const canvas = document.createElement('canvas');
+                        const MAX_WIDTH = 800;
+                        const MAX_HEIGHT = 800;
+                        let width = img.width;
+                        let height = img.height;
+
+                        if (width > height) {
+                            if (width > MAX_WIDTH) {
+                                height *= MAX_WIDTH / width;
+                                width = MAX_WIDTH;
+                            }
+                        } else {
+                            if (height > MAX_HEIGHT) {
+                                width *= MAX_HEIGHT / height;
+                                height = MAX_HEIGHT;
+                            }
+                        }
+                        canvas.width = width;
+                        canvas.height = height;
+                        const ctx = canvas.getContext('2d');
+                        ctx.drawImage(img, 0, 0, width, height);
+                        resolve(canvas.toDataURL('image/jpeg', 0.6)); 
+                    };
+                };
+            });
+        };
+
+        // --- Firebase Init ---
+        const initFirebase = async () => {
+            try {
+                if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                    await signInWithCustomToken(auth, __initial_auth_token);
+                } else {
+                    await signInAnonymously(auth);
+                }
+            } catch (err) {
+                console.error("Auth error:", err);
+            }
+        };
+
+        initFirebase();
+
+        onAuthStateChanged(auth, (currentUser) => {
+            user = currentUser;
+            if (user) {
+                // Fetch Products
+                const productsRef = getProductsCollectionPath();
+                onSnapshot(productsRef, 
+                    (snapshot) => {
+                        products = snapshot.docs.map(doc => ({
+                            id: doc.id,
+                            ...doc.data()
+                        }));
+                        products.sort((a, b) => b.createdAt - a.createdAt);
+                        renderStorefront();
+                        renderAdminGrid();
+                    },
+                    (error) => console.error("Error fetching products:", error)
+                );
+
+                // Fetch Orders
+                const ordersRef = getOrdersCollectionPath();
+                onSnapshot(ordersRef, 
+                    (snapshot) => {
+                        orders = snapshot.docs.map(doc => ({
+                            id: doc.id,
+                            ...doc.data()
+                        }));
+                        orders.sort((a, b) => b.createdAt - a.createdAt);
+                        renderOrdersGrid();
+                    },
+                    (error) => console.error("Error fetching orders:", error)
+                );
+            }
+        });
+
+        // --- Render Functions ---
+
+        const renderStorefront = () => {
+            if (products.length === 0) {
+                elements.storeGrid.innerHTML = `
+                    <div class="col-span-full text-center py-24 border border-white/10 bg-transparent">
+                        <p class="text-gray-500 tracking-widest uppercase text-sm">Our collection is currently being prepared.</p>
+                    </div>`;
+                return;
+            }
+
+            elements.storeGrid.innerHTML = products.map((product) => `
+                <div class="group cursor-pointer bg-white text-black border border-white/10 flex flex-col h-full shadow-lg">
+                    <div class="relative aspect-[4/5] overflow-hidden bg-gray-100 w-full">
+                        <img src="${product.image}" alt="${product.title}" class="w-full h-full object-cover object-center transform group-hover:scale-105 transition-transform duration-1000 ease-out" />
+                        <div class="absolute inset-0 bg-black/5 group-hover:bg-transparent transition-colors duration-500"></div>
+                        <div class="absolute bottom-0 left-0 w-full p-6 translate-y-full group-hover:translate-y-0 transition-transform duration-500 ease-out flex justify-center">
+                            <button data-id="${product.id}" class="add-to-cart-btn bg-black/95 backdrop-blur text-white w-full py-4 text-xs font-bold tracking-widest uppercase hover:bg-gray-800 transition-colors shadow-2xl">
+                                Acquire Piece
+                            </button>
+                        </div>
+                    </div>
+                    <div class="text-center p-6 flex flex-col flex-grow justify-between">
+                        <div>
+                            <h3 class="text-xl md:text-2xl font-serif mb-2 tracking-wide text-black">${product.title}</h3>
+                            <p class="text-gray-500 text-sm mb-4 line-clamp-2 leading-relaxed">${product.description}</p>
+                        </div>
+                        <p class="text-sm tracking-widest text-black font-semibold mt-auto">${formatRupees(product.price)}</p>
+                    </div>
+                </div>
+            `).join('');
+        };
+
+        const renderAdminGrid = () => {
+            if (products.length === 0) {
+                elements.adminGrid.innerHTML = `<p class="text-gray-500 text-sm col-span-full border border-gray-200 bg-gray-50 p-8 text-center">The collection is currently empty.</p>`;
+                return;
+            }
+
+            elements.adminGrid.innerHTML = products.map((product) => `
+                <div class="bg-gray-50 border border-gray-200 shadow-sm group relative overflow-hidden flex flex-col">
+                    <div class="aspect-square w-full overflow-hidden relative bg-white">
+                        <div class="absolute inset-0 bg-white/70 opacity-0 group-hover:opacity-100 transition-opacity z-10 flex items-center justify-center backdrop-blur-[2px]">
+                            <button data-id="${product.id}" class="delete-btn bg-black text-white p-4 rounded-full hover:bg-red-600 transition-colors transform translate-y-4 group-hover:translate-y-0 duration-300 shadow-xl">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                            </button>
+                        </div>
+                        <img src="${product.image}" alt="${product.title}" class="w-full h-full object-cover group-hover:scale-105 transition-all duration-700" />
+                    </div>
+                    <div class="p-5 md:p-6 flex-1 flex flex-col justify-between bg-white border-t border-gray-200">
+                        <div>
+                            <h4 class="text-lg font-serif tracking-wide text-black">${product.title}</h4>
+                            <p class="text-gray-500 text-xs md:text-sm mt-2 line-clamp-2">${product.description}</p>
+                        </div>
+                        <p class="text-black mt-4 text-sm tracking-widest font-bold">${formatRupees(product.price)}</p>
+                    </div>
+                </div>
+            `).join('');
+        };
+
+        const renderOrdersGrid = () => {
+            elements.orderCountBadge.textContent = orders.length;
+
+            if (orders.length === 0) {
+                elements.adminOrdersGrid.innerHTML = `<p class="text-gray-500 text-sm border border-gray-200 bg-gray-50 p-8 text-center">No inquiries at the moment.</p>`;
+                return;
+            }
+
+            elements.adminOrdersGrid.innerHTML = orders.map((order) => `
+                <div class="bg-white border border-gray-200 shadow-sm p-6 md:p-8 flex flex-col md:flex-row justify-between gap-6 relative overflow-hidden">
+                    <div class="absolute top-0 left-0 w-1 h-full bg-black"></div>
+                    
+                    <div class="space-y-5 flex-1">
+                        <div>
+                            <div class="flex items-center gap-4 mb-2">
+                                <h4 class="text-xl font-serif tracking-wide text-black">${order.name}</h4>
+                                <span class="text-[10px] bg-black text-white px-3 py-1 rounded-sm tracking-widest uppercase">${new Date(order.createdAt).toLocaleDateString()}</span>
+                            </div>
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm text-gray-600 mt-4">
+                                <p><strong class="font-medium text-black">Phone:</strong> ${order.phone}</p>
+                                ${order.whatsapp ? `<p><strong class="font-medium text-black">WhatsApp:</strong> ${order.whatsapp}</p>` : ''}
+                                <p class="sm:col-span-2"><strong class="font-medium text-black">Address:</strong> ${order.address}</p>
+                            </div>
+                        </div>
+                        
+                        <div class="border-t border-gray-200 pt-4">
+                            <p class="text-xs tracking-widest text-gray-400 uppercase mb-3">Requested Pieces</p>
+                            <div class="space-y-3">
+                                ${order.items.map(item => `
+                                    <div class="flex items-center gap-4">
+                                        <img src="${item.image}" class="w-10 h-12 object-cover border border-gray-200" />
+                                        <span class="text-base font-serif text-black">${item.title}</span>
+                                        <span class="text-sm text-black font-semibold ml-auto">${formatRupees(item.price)}</span>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="flex flex-col items-start md:items-end justify-between border-t md:border-t-0 md:border-l border-gray-200 pt-6 md:pt-0 md:pl-8 min-w-[180px]">
+                        <div class="text-left md:text-right w-full mb-6">
+                            <p class="text-[10px] tracking-widest text-gray-400 uppercase mb-2">Total Value</p>
+                            <p class="text-xl font-bold text-black">${formatRupees(order.total)}</p>
+                        </div>
+                        <button data-id="${order.id}" class="delete-order-btn w-full text-xs text-black border-2 border-black bg-transparent hover:bg-black hover:text-white py-3 px-4 transition-colors font-bold uppercase tracking-widest">
+                            Mark Handled
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+        };
+
+        const renderCart = () => {
+            // Update badge
+            if (cart.length > 0) {
+                elements.cartBadge.textContent = cart.length;
+                elements.cartBadge.classList.remove('hidden');
+                elements.cartFooter.classList.remove('hidden');
+            } else {
+                elements.cartBadge.classList.add('hidden');
+                elements.cartFooter.classList.add('hidden');
+            }
+
+            // Calculate total
+            const total = cart.reduce((sum, item) => sum + item.price, 0);
+            elements.cartTotal.textContent = formatRupees(total);
+
+            // Render Items
+            if (cart.length === 0) {
+                elements.cartItemsContainer.innerHTML = `
+                    <div class="h-full flex flex-col items-center justify-center text-gray-400 mt-20">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="mb-6 opacity-30"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path><line x1="3" y1="6" x2="21" y2="6"></line><path d="M16 10a4 4 0 0 1-8 0"></path></svg>
+                        <p class="tracking-widest uppercase text-xs">Your selection is empty</p>
+                    </div>`;
+                return;
+            }
+
+            elements.cartItemsContainer.innerHTML = cart.map((item, index) => `
+                <div class="flex gap-6 border-b border-gray-200 pb-6">
+                    <div class="w-20 h-24 md:w-24 md:h-32 bg-gray-50 overflow-hidden flex-shrink-0 shadow-sm border border-gray-200">
+                        <img src="${item.image}" alt="${item.title}" class="w-full h-full object-cover" />
+                    </div>
+                    <div class="flex-1 flex flex-col justify-between py-1">
+                        <div>
+                            <h4 class="font-serif text-sm md:text-base tracking-wide text-black">${item.title}</h4>
+                            <p class="text-black text-sm mt-2 font-bold">${formatRupees(item.price)}</p>
+                        </div>
+                        <button data-index="${index}" class="remove-cart-btn text-[10px] md:text-xs text-gray-400 tracking-widest hover:text-red-600 self-start transition-colors uppercase font-medium">
+                            Remove
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+        };
+
+        const toggleAdminView = (show) => {
+            isAdmin = show;
+            if (isAdmin) {
+                elements.storefrontView.classList.add('hidden');
+                elements.adminView.classList.remove('hidden');
+                elements.lockIcon.classList.add('hidden');
+                elements.xIcon.classList.remove('hidden');
+                document.body.classList.replace('bg-[#050505]', 'bg-gray-100'); // Light bg behind admin panel
+            } else {
+                elements.storefrontView.classList.remove('hidden');
+                elements.adminView.classList.add('hidden');
+                elements.lockIcon.classList.remove('hidden');
+                elements.xIcon.classList.add('hidden');
+                document.body.classList.replace('bg-gray-100', 'bg-[#050505]');
+            }
+        };
+
+        const toggleCart = (show) => {
+            if (show) {
+                elements.cartOverlay.classList.remove('hidden');
+                setTimeout(() => elements.cartSidebar.classList.remove('translate-x-full'), 10);
+            } else {
+                elements.cartSidebar.classList.add('translate-x-full');
+                setTimeout(() => elements.cartOverlay.classList.add('hidden'), 500);
+            }
+        };
+
+        const toggleCheckoutModal = (show) => {
+            if (show) {
+                elements.checkoutModal.classList.remove('hidden');
+                elements.checkoutModal.classList.add('flex');
+            } else {
+                elements.checkoutModal.classList.add('hidden');
+                elements.checkoutModal.classList.remove('flex');
+                
+                // Reset states
+                elements.checkoutFormContainer.classList.remove('hidden');
+                elements.checkoutSuccessContainer.classList.add('hidden');
+                elements.checkoutSuccessContainer.classList.remove('flex');
+                elements.checkoutForm.reset();
+            }
+        };
+
+        // --- Event Listeners ---
+
+        // Admin Auth Flow
+        elements.navAdminBtn.addEventListener('click', () => {
+            if (isAdmin) {
+                toggleAdminView(false);
+            } else {
+                elements.adminModal.classList.remove('hidden');
+                elements.adminModal.classList.add('flex');
+                elements.adminPassword.focus();
+            }
+        });
+
+        elements.closeAdminModal.addEventListener('click', () => {
+            elements.adminModal.classList.add('hidden');
+            elements.adminModal.classList.remove('flex');
+            elements.adminError.classList.add('hidden');
+            elements.adminPassword.value = '';
+        });
+
+        elements.navLogoBtn.addEventListener('click', () => toggleAdminView(false));
+
+        elements.adminForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            if (elements.adminPassword.value === "wolf369") {
+                toggleAdminView(true);
+                elements.adminModal.classList.add('hidden');
+                elements.adminModal.classList.remove('flex');
+                elements.adminPassword.value = '';
+                elements.adminError.classList.add('hidden');
+            } else {
+                elements.adminError.textContent = "Incorrect password. Access denied.";
+                elements.adminError.classList.remove('hidden');
+            }
+        });
+
+        // Cart Flow
+        elements.navCartBtn.addEventListener('click', () => toggleCart(true));
+        elements.closeCartBtn.addEventListener('click', () => toggleCart(false));
+        elements.cartOverlay.addEventListener('click', () => toggleCart(false));
+
+        // Checkout Button in Cart -> Opens Information Modal
+        elements.checkoutBtn.addEventListener('click', () => {
+            toggleCart(false);
+            toggleCheckoutModal(true);
+        });
+
+        elements.closeCheckoutModal.addEventListener('click', () => toggleCheckoutModal(false));
+        elements.checkoutDoneBtn.addEventListener('click', () => toggleCheckoutModal(false));
+
+        // Submit Checkout Form
+        elements.checkoutForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            elements.coSubmitBtn.disabled = true;
+            elements.coSubmitBtn.innerHTML = 'Processing...';
+
+            const orderData = {
+                name: document.getElementById('coName').value,
+                phone: document.getElementById('coPhone').value,
+                whatsapp: document.getElementById('coWhatsapp').value,
+                address: document.getElementById('coAddress').value,
+                items: cart, // save the entire cart items
+                total: cart.reduce((sum, item) => sum + item.price, 0),
+                createdAt: Date.now(),
+                status: 'pending'
+            };
+
+            try {
+                // Add order to Firestore
+                await addDoc(getOrdersCollectionPath(), orderData);
+                
+                // Show Success Screen
+                elements.checkoutFormContainer.classList.add('hidden');
+                elements.checkoutSuccessContainer.classList.remove('hidden');
+                elements.checkoutSuccessContainer.classList.add('flex');
+                
+                // Empty the cart
+                cart = [];
+                renderCart();
+
+            } catch (err) {
+                console.error("Order submission error", err);
+                elements.coSubmitBtn.innerHTML = 'Error. Try Again';
+            } finally {
+                elements.coSubmitBtn.disabled = false;
+            }
+        });
+
+
+        // Add Product Flow (Image Upload)
+        elements.prodImage.addEventListener('change', async (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+            
+            elements.imagePlaceholder.innerHTML = `<span class="animate-pulse text-sm text-gray-500">Compressing...</span>`;
+            
+            try {
+                currentImageBase64 = await compressImage(file);
+                elements.imagePreview.src = currentImageBase64;
+                elements.imagePlaceholder.classList.add('hidden');
+                elements.imagePreviewContainer.classList.remove('hidden');
+                elements.imagePreviewContainer.classList.add('flex');
+            } catch (err) {
+                console.error("Error compressing image", err);
+                elements.imagePlaceholder.innerHTML = `<span class="text-red-500 text-sm">Error processing image</span>`;
+            }
+        });
+
+        // Add Product Submit
+        elements.addProductForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            if (!currentImageBase64) return;
+            
+            elements.submitBtn.disabled = true;
+            elements.submitBtn.innerHTML = 'Publishing...';
+
+            try {
+                const productsRef = getProductsCollectionPath();
+                await addDoc(productsRef, {
+                    title: elements.prodTitle.value,
+                    price: parseFloat(elements.prodPrice.value),
+                    description: elements.prodDesc.value,
+                    image: currentImageBase64,
+                    createdAt: Date.now()
+                });
+                
+                // Reset Form
+                elements.addProductForm.reset();
+                currentImageBase64 = "";
+                elements.imagePreviewContainer.classList.add('hidden');
+                elements.imagePreviewContainer.classList.remove('flex');
+                elements.imagePlaceholder.classList.remove('hidden');
+                elements.imagePlaceholder.innerHTML = `
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="mb-2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
+                    <span class="text-sm">Choose File</span>
+                    <span class="text-[10px] opacity-70 mt-1">Auto-compresses</span>
+                `;
+            } catch (err) {
+                console.error("Error adding product:", err);
+            } finally {
+                elements.submitBtn.disabled = false;
+                elements.submitBtn.innerHTML = `
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                    Publish Piece
+                `;
+            }
+        });
+
+        // Event Delegation for dynamically generated buttons
+        document.body.addEventListener('click', async (e) => {
+            // Add to Cart
+            const addBtn = e.target.closest('.add-to-cart-btn');
+            if (addBtn) {
+                const id = addBtn.dataset.id;
+                const product = products.find(p => p.id === id);
+                if (product) {
+                    cart.push(product);
+                    renderCart();
+                    toggleCart(true);
+                }
+            }
+
+            // Remove from Cart
+            const removeBtn = e.target.closest('.remove-cart-btn');
+            if (removeBtn) {
+                const index = parseInt(removeBtn.dataset.index);
+                cart.splice(index, 1);
+                renderCart();
+            }
+
+            // Delete Product (Admin)
+            const deleteBtn = e.target.closest('.delete-btn');
+            if (deleteBtn) {
+                const id = deleteBtn.dataset.id;
+                try {
+                    let docRef;
+                    if (typeof __app_id !== 'undefined') {
+                        docRef = doc(db, 'artifacts', appId, 'public', 'data', 'products', id);
+                    } else {
+                        docRef = doc(db, 'products', id);
+                    }
+                    await deleteDoc(docRef);
+                } catch (err) {
+                    console.error("Error deleting product:", err);
+                }
+            }
+
+            // Mark Order Handled/Deleted (Admin)
+            const deleteOrderBtn = e.target.closest('.delete-order-btn');
+            if (deleteOrderBtn) {
+                const id = deleteOrderBtn.dataset.id;
+                try {
+                    let docRef;
+                    if (typeof __app_id !== 'undefined') {
+                        docRef = doc(db, 'artifacts', appId, 'public', 'data', 'orders', id);
+                    } else {
+                        docRef = doc(db, 'orders', id);
+                    }
+                    await deleteDoc(docRef);
+                } catch (err) {
+                    console.error("Error deleting order:", err);
+                }
+            }
+        });
+
+        // Initial empty cart render
+        renderCart();
+    </script>
+</body>
+</html>
